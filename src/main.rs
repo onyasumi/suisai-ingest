@@ -1,7 +1,9 @@
 mod get_shutter;
+mod get_date;
 
 use crate::get_shutter::get_shutter;
 use std::path::Path;
+use crate::get_date::get_date;
 
 fn main() {
 
@@ -26,6 +28,6 @@ fn main() {
     }
 
     println!("Shutter Count: {}", get_shutter(source_dir).unwrap());
-    println!("Timestamp: {}", get_shutter(source_dir).unwrap());
+    println!("Timestamp: {} {}", get_date(source_dir).unwrap().year, get_date(source_dir).unwrap().month_day);
 
 }
