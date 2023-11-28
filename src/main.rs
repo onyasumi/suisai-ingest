@@ -1,6 +1,8 @@
 mod metadata;
+mod io;
 
 use std::path::Path;
+use crate::io::search_directory::search_directory;
 use crate::metadata::get_date::get_date;
 use crate::metadata::get_shutter::get_shutter;
 
@@ -28,5 +30,6 @@ fn main() {
 
     println!("Shutter Count: {}", get_shutter(source_dir).unwrap());
     println!("Timestamp: {} {}", get_date(source_dir).unwrap().year, get_date(source_dir).unwrap().month_day);
+    search_directory(dest_dir);
 
 }
