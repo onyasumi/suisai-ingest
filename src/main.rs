@@ -1,9 +1,8 @@
-mod get_shutter;
-mod get_date;
+mod metadata;
 
-use crate::get_shutter::get_shutter;
 use std::path::Path;
-use crate::get_date::get_date;
+use crate::metadata::get_date::get_date;
+use crate::metadata::get_shutter::get_shutter;
 
 fn main() {
 
