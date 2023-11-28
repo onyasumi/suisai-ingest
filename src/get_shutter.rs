@@ -1,12 +1,12 @@
-use std::error::Error;
 use std::path::Path;
 use std::process::Command;
 use std::io::ErrorKind::NotFound;
+use anyhow::{bail, Result};
 
-pub fn get_shutter(file: &Path) -> Result<String, Box<dyn Error>> {
+pub fn get_shutter(file: &Path) -> Result<String> {
 
     if !file.is_file() {
-        return Err(format!("Invalid path: {} not exist or is not a file", file.to_str().unwrap_or("")).into())
+        bail!("Invalid path: {} not exist or is not a file", file.to_str().unwrap_or(""))
     }
 
     let result = String::from_utf8(match Command::new("exiftool")
@@ -17,17 +17,17 @@ pub fn get_shutter(file: &Path) -> Result<String, Box<dyn Error>> {
         .output() {
         Ok(result) => result.stdout,
         Err(e) => {
-            return if e.kind() == NotFound {
-                Err("exiftool not found".into())
+            if e.kind() == NotFound {
+                bail!("exiftool not found")
             } else {
-                Err(e.into())
+                return Err(e.into())
             }
         }
     })?;
 
 
     if result.is_empty() {
-        Err("EXIF data does not contain a shutter count".into())
+        bail!("EXIF data does not contain a shutter count")
     } else {
         Ok(result.strip_suffix('\n').unwrap_or(&*result).to_string())
     }

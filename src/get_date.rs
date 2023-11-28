@@ -1,7 +1,7 @@
-use std::error::Error;
+use std::io::ErrorKind::NotFound;
 use std::path::Path;
 use std::process::Command;
-use std::io::ErrorKind::NotFound;
+use anyhow::{bail, Result};
 
 pub struct Date {
     pub year: String,
@@ -12,10 +12,10 @@ const MONTH: &[&str] = &[
     "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
 ];
 
-pub fn get_date(file: &Path) -> Result<Date, Box<dyn Error>> {
+pub fn get_date(file: &Path) -> Result<Date> {
 
     if !file.is_file() {
-        return Err(format!("Invalid path: {} not exist or is not a file", file.to_str().unwrap_or("")).into())
+        bail!(format!("Invalid path: {} not exist or is not a file", file.to_str().unwrap_or("")))
     }
 
     let result = String::from_utf8(match Command::new("exiftool")
@@ -26,10 +26,10 @@ pub fn get_date(file: &Path) -> Result<Date, Box<dyn Error>> {
         .output() {
         Ok(result) => result.stdout,
         Err(e) => {
-            return if e.kind() == NotFound {
-                Err("exiftool not found".into())
+            if e.kind() == NotFound {
+                bail!("exiftool not found")
             } else {
-                Err(e.into())
+                return Err(e.into())
             }
         }
     })?;
@@ -37,14 +37,13 @@ pub fn get_date(file: &Path) -> Result<Date, Box<dyn Error>> {
     let date_arr: Box<[&str]> = result.split([':', ' ']).take(3).collect();
 
     if date_arr.len() < 3 {
-        return Err("DateTimeOriginal field missing or corrupted".into())
+        bail!("DateTimeOriginal field missing or corrupted")
     }
 
     let date: Date = Date {
         year: date_arr[0].to_string(),
         month_day: format!("{} {}", MONTH[date_arr[1].parse::<usize>()?], date_arr[2])
     };
-
 
     Ok(date)
 
