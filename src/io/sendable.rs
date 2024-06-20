@@ -1,5 +1,5 @@
 use std::ffi::OsStr;
-use std::fs::{create_dir_all, rename};
+use std::fs::{create_dir_all, rename, copy};
 use std::path::Path;
 use anyhow::{bail, Result};
 use crate::metadata::get_date::get_date;
@@ -29,7 +29,13 @@ impl Sendable for Path {
         }
 
         // Move file
-        rename(self, dest_file)?;
+        if rename(self, &dest_file).is_ok() {
+            println!(" -> Image {} relocated to {}", self.to_str().unwrap(), dest_file.to_str().unwrap());
+            return Ok(());
+        }
+
+        copy(self, &dest_file)?;
+        println!(" -> Image {} copied to {}", self.to_str().unwrap(), dest_file.to_str().unwrap());
 
         Ok(())
 
